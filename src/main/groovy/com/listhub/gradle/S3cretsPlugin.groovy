@@ -6,28 +6,45 @@ import org.gradle.api.Plugin;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 
-class ListhubBuildPlugin implements Plugin<Project> {
+class S3cretsPlugin implements Plugin<Project> {
+
   void apply(Project project) {
 
-    project.extensions.create("ListhubBuild", ListhubBuildPluginExtension)
+    project.extensions.create("s3crets", S3cretsPluginExtension, project)
+  }
+}
 
-    // TODO: get this from dsl
+class S3cretsPluginExtension {
 
-    // def s3paths = ["s3://secrets.us-east-1.listhub.net/gradle/artifactory.properties"]
-    // for (s3path in s3paths) {
-    for (s3path in project.ListhubBuild.s3Paths) {
+  Project project
+
+  boolean override = false
+
+  S3cretsPluginExtension(Project project) {
+    this.project = project
+  }
+
+  def override(val) {
+    this.override = val
+  }
+
+  public void s3Paths(String... s3paths) {
+    for (s3path in s3paths) {
       def s3ObjRef = parseS3Url(s3path)
       def s3Client = new AmazonS3Client();
       def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
 
       def props = new Properties()
-      props.load(s3Obj.getObjectContent())
+      props.load(s3Object.getObjectContent())
 
       props.each { key, val ->
-        project.set(key, val)
+        if (this.override || this.project.get(key) == null) {
+          this.project.set(key, val)
+        }
       }
     }
   }
+
 
   S3ObjRef parseS3Url(String url) {
     if(!url.startsWith("s3://")) {
@@ -51,10 +68,6 @@ class ListhubBuildPlugin implements Plugin<Project> {
     throw new IllegalArgumentException("${url} is not a valid s3 url. Please "
       + " pass in a valid s3 url in the form s3://<bucket_name>/<key>")
   }
-}
-
-class ListhubBuildPluginExtension {
-  List<String> s3Paths
 }
 
 class S3ObjRef {

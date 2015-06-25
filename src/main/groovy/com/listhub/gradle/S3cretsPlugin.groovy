@@ -9,9 +9,13 @@ import com.amazonaws.services.s3.AmazonS3Client;
 class ListhubBuildPlugin implements Plugin<Project> {
   void apply(Project project) {
 
+    project.extensions.create("ListhubBuild", ListhubBuildPluginExtension)
+
     // TODO: get this from dsl
-    def s3paths = ["s3://secrets.us-east-1.listhub.net/gradle/artifactory.properties"]
-    for (s3path in s3paths) {
+
+    // def s3paths = ["s3://secrets.us-east-1.listhub.net/gradle/artifactory.properties"]
+    // for (s3path in s3paths) {
+    for (s3path in project.ListhubBuild.s3Paths) {
       def s3ObjRef = parseS3Url(s3path)
       def s3Client = new AmazonS3Client();
       def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
@@ -47,6 +51,10 @@ class ListhubBuildPlugin implements Plugin<Project> {
     throw new IllegalArgumentException("${url} is not a valid s3 url. Please "
       + " pass in a valid s3 url in the form s3://<bucket_name>/<key>")
   }
+}
+
+class ListhubBuildPluginExtension {
+  List<String> s3Paths
 }
 
 class S3ObjRef {

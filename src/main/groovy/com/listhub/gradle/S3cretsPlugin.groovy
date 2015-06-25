@@ -6,7 +6,6 @@ import org.gradle.api.Plugin;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 
-
 class ListhubBuildPlugin implements Plugin<Project> {
   void apply(Project project) {
 
@@ -15,7 +14,7 @@ class ListhubBuildPlugin implements Plugin<Project> {
     for (s3path in s3paths) {
       def s3ObjRef = parseS3Url(s3path)
       def s3Client = new AmazonS3Client();
-      def s3Obj = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
+      def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
 
       def props = new Properties()
       props.load(s3Obj.getObjectContent())
@@ -26,7 +25,7 @@ class ListhubBuildPlugin implements Plugin<Project> {
     }
   }
 
-  S3OBj parseS3Url(String url) {
+  S3ObjRef parseS3Url(String url) {
     if(!url.startsWith("s3://")) {
       throwInvalidS3PathException(url)
     }
@@ -41,7 +40,7 @@ class ListhubBuildPlugin implements Plugin<Project> {
     def bucket = urlSplit[0]
     def key = urlSplit[1..-1].join("/")
 
-    return new S3Obj(bucket: bucket, key: key)
+    return new S3ObjRef(bucket: bucket, key: key)
   }
 
   def throwInvalidS3PathException(String url) {

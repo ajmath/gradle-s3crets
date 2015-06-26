@@ -67,7 +67,6 @@ bintray {
     publicDownloadNumbers = true
     version {
       name = project.version //Bintray logical version name
-      desc = ""//Optional - Version-specific description'
       released  = new Date()
       vcsTag = project.version
       attributes = [

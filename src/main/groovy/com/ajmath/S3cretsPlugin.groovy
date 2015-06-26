@@ -35,7 +35,10 @@ class S3cretsPluginExtension {
       props.load(s3Object.getObjectContent())
 
       props.each { key, val ->
-        if (this.override || this.project.get(key) == null || this.project.get(key) == "") {
+        if (this.override ||
+            this.project.getProperties().containsKey(key) == false ||
+            this.project.get(key) == "" ||
+            this.project.get(key) == null) {
           this.project.set(key, val)
         }
       }

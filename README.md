@@ -8,9 +8,12 @@ AWS credentials must be specified in some manner in the default [AWS Credentials
 
 ```
 buildscript {
-    repositories {
-        jcenter()
-    }
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath(group: 'com.ajmath', name: 'gradle-s3crets', version: '0.1.0')
+  }
 }
 
 apply plugin: 'gradle-s3crets'

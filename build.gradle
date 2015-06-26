@@ -3,14 +3,13 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 repositories {
-    jcenter()
+  jcenter()
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
-    compile gradleApi()
-    compile 'com.amazonaws:aws-java-sdk-s3:1.10.1'
+  compile gradleApi()
+  compile 'com.amazonaws:aws-java-sdk-s3:1.10.1'
 }
 
 version = "0.1.0"
-group = 'com.listhub.gradle'
+group = 'com.ajmath'

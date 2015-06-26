@@ -1,4 +1,4 @@
-package com.listhub.gradle;
+package com.ajmath;
 
 
 import org.gradle.api.Project;
@@ -7,17 +7,14 @@ import org.gradle.api.Plugin;
 import com.amazonaws.services.s3.AmazonS3Client;
 
 class S3cretsPlugin implements Plugin<Project> {
-
   void apply(Project project) {
-
-    project.extensions.create("s3crets-gradle", S3cretsPluginExtension, project)
+    project.extensions.create("s3crets", S3cretsPluginExtension, project)
   }
 }
 
 class S3cretsPluginExtension {
 
   Project project
-
   boolean override = false
 
   S3cretsPluginExtension(Project project) {
@@ -28,23 +25,22 @@ class S3cretsPluginExtension {
     this.override = val
   }
 
-  public void s3Paths(String... s3paths) {
+  def properties(String... s3paths) {
     for (s3path in s3paths) {
       def s3ObjRef = parseS3Url(s3path)
-      def s3Client = new AmazonS3Client();
+      def s3Client = new AmazonS3Client()
       def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
 
       def props = new Properties()
       props.load(s3Object.getObjectContent())
 
       props.each { key, val ->
-        if (this.override || this.project.getProperties().containsKey(key) == false) {
+        if (this.override || this.project.get(key) == null || this.project.get(key) == "") {
           this.project.set(key, val)
         }
       }
     }
   }
-
 
   S3ObjRef parseS3Url(String url) {
     if(!url.startsWith("s3://")) {

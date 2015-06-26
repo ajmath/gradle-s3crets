@@ -6,6 +6,8 @@ Download and apply properties to a Gradle project from properties files stored i
 
 AWS credentials must be specified in some manner in the default [AWS Credentials Chain](http://docs.aws.amazon.com/AWSSdkDocsJava/latest//DeveloperGuide/credentials.html#credentials-default)
 
+Gradle file:
+
 ```
 buildscript {
   repositories {
@@ -16,13 +18,23 @@ buildscript {
   }
 }
 
-apply plugin: 'gradle-s3crets'
+apply plugin: 'com.ajmath.gradle-s3crets'
 
-gradle-s3crets {
-  s3Paths "s3://secrets.my.bucket/path/to/secrets.properties"
+s3crets {
+  properties "s3://secrets.my.bucket/path/to/secrets.properties"
 }
 
 ```
+
+By default, the properties loaded from the S3 properties files will *not* override properties defined in the project.  To disable this behavior, set override to true:
+
+```
+s3crets {
+  override true
+  properties "s3://secrets.my.bucket/path/to/secrets.properties"
+}
+```
+
 
 ## Contributing
 

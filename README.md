@@ -1,4 +1,4 @@
-# s3crets-gradle
+# gradle-s3crets
 
 Download and apply properties to a Gradle project from properties files stored in an [Amazon S3 Bucket](http://aws.amazon.com/s3/)
 
@@ -13,9 +13,9 @@ buildscript {
     }
 }
 
-apply plugin: 's3crets-gradle'
+apply plugin: 'gradle-s3crets'
 
-s3crets-gradle {
+gradle-s3crets {
   s3Paths "s3://secrets.my.bucket/path/to/secrets.properties"
 }
 

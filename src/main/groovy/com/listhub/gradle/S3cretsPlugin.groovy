@@ -10,7 +10,7 @@ class S3cretsPlugin implements Plugin<Project> {
 
   void apply(Project project) {
 
-    project.extensions.create("s3crets", S3cretsPluginExtension, project)
+    project.extensions.create("s3crets-gradle", S3cretsPluginExtension, project)
   }
 }
 

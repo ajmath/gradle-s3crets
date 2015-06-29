@@ -2,11 +2,11 @@
 
 Download and apply properties to a Gradle project from properties files stored in an [Amazon S3 Bucket](http://aws.amazon.com/s3/)
 
+Check https://plugins.gradle.org/plugin/com.ajmath.gradle-s3crets or https://bintray.com/ajmath/gradle-plugins/gradle-s3crets for the latest version
+
 ## Usage
 
 AWS credentials must be specified in some manner in the default [AWS Credentials Chain](http://docs.aws.amazon.com/AWSSdkDocsJava/latest//DeveloperGuide/credentials.html#credentials-default)
-
-Check https://plugins.gradle.org/plugin/com.ajmath.gradle-s3crets for the latest version
 
 Gradle file:
 
@@ -20,14 +20,12 @@ buildscript {
     classpath(group: 'com.ajmath', name: 'gradle-s3crets', version: '1.0.0')
   }
 }
+apply plugin: 'com.ajmath.gradle-s3crets'
 
 // Gradle 2.1 and later
 plugins {
-  id "com.jfrog.bintray" version "1.1"
   id "com.ajmath.gradle-s3crets" version "1.0.0"
 }
-
-apply plugin: 'com.ajmath.gradle-s3crets'
 
 s3crets {
   properties "s3://secrets.my.bucket/path/to/secrets.properties"

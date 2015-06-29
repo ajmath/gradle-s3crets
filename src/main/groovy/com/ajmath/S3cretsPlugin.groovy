@@ -35,13 +35,19 @@ class S3cretsPluginExtension {
       props.load(s3Object.getObjectContent())
 
       props.each { key, val ->
-        if (this.override ||
-            this.project.getProperties().containsKey(key) == false ||
-            this.project.get(key) == "" ||
-            this.project.get(key) == null) {
+        if (this.override || propertyNotDefined(key)) {
           this.project.set(key, val)
         }
       }
+    }
+  }
+
+  def propertyNotDefined(String property) {
+    try {
+      return this.project.getProperty(key) == "" ||
+        this.project.getProperty(key) == null
+    } catch(MissingPropertyException e) {
+      return true
     }
   }
 

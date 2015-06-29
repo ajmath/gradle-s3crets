@@ -1,22 +1,24 @@
-
 buildscript {
   repositories {
-    maven {
-      url "http://dl.bintray.com/ajmath/gradle-plugins"
-    }
+    jcenter()
   }
   dependencies {
-    classpath "com.ajmath:gradle-s3crets:0.1.2"
+    classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
   }
 }
 
 plugins {
-    id "com.jfrog.bintray" version "1.1"
+  id "com.jfrog.bintray" version "1.1"
+  id "com.ajmath.gradle-s3crets" version "0.2.1"
 }
 
-apply plugin: "com.ajmath.gradle-s3crets"
+apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'groovy'
 apply plugin: 'maven'
+
+s3crets {
+  properties "s3://secrets-ajmath/gradle/bintray-publish.properties"
+}
 
 repositories {
   jcenter()
@@ -24,15 +26,12 @@ repositories {
 
 dependencies {
   compile gradleApi()
+  compile localGroovy()
   compile 'com.amazonaws:aws-java-sdk-s3:1.10.1'
 }
 
-version = "0.2.0"
+version = "1.0.0"
 group = 'com.ajmath'
-
-s3crets {
-  properties "s3://secrets-ajmath/gradle/bintray-publish.properties"
-}
 
 configurations {
   archives
@@ -47,6 +46,14 @@ artifacts {
   archives jar, sourceJar
 }
 
+ext.plugin_id="com.ajmath.gradle-s3crets"
+ext.plugin_display_name="Gradle s3 properties"
+ext.plugin_website="https://github.com/ajmath/gradle-s3crets"
+ext.plugin_issues="https://github.com/ajmath/gradle-s3crets/issues"
+ext.plugin_vcs="https://github.com/ajmath/gradle-s3crets.git"
+ext.plugin_desc="Pull gradle properties from s3.  Especially useful for secrets"
+ext.plugin_tags=['gradle', 's3', 'secrets']
+
 bintray {
   user = 'ajmath'
   key = "${bintray_apikey}"
@@ -57,20 +64,20 @@ bintray {
   publish = true //If version should be auto published after an upload
   pkg {
     repo = 'gradle-plugins'
-    name = 'gradle-s3crets'
-    desc = 'Pull senstive gradle properties from s3'
-    websiteUrl = 'https://github.com/ajmath/gradle-s3crets'
-    issueTrackerUrl = 'https://github.com/ajmath/gradle-s3crets/issues'
-    vcsUrl = 'https://github.com/ajmath/gradle-s3crets.git'
+    name = project.name
+    desc = plugin_desc
+    websiteUrl = plugin_website
+    issueTrackerUrl = plugin_issues
+    vcsUrl = plugin_vcs
     licenses = ['WTFPL']
-    labels = ['gradle', 's3', 'secrets']
+    labels = plugin_tags
     publicDownloadNumbers = true
     version {
       name = project.version //Bintray logical version name
       released  = new Date()
       vcsTag = project.version
       attributes = [
-        'gradle-plugin': "com.ajmath.gradle-s3crets:${project.group}:${project.name}"
+        'gradle-plugin': "${plugin_id}:${project.group}:${project.name}"
       ]
       //Optional configuration for GPG signing
       gpg {
@@ -80,3 +87,19 @@ bintray {
     }
   }
 }
+
+pluginBundle {
+  website = plugin_website
+  vcsUrl = plugin_vcs
+  description = plugin_desc
+  tags = plugin_tags
+  plugins {
+    greetingsPlugin {
+      id = plugin_id
+      displayName = plugin_display_name
+    }
+  }
+}
+
+
+task publishAll(dependsOn: ["bintrayUpload", "publishPlugins"])

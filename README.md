@@ -6,16 +6,25 @@ Download and apply properties to a Gradle project from properties files stored i
 
 AWS credentials must be specified in some manner in the default [AWS Credentials Chain](http://docs.aws.amazon.com/AWSSdkDocsJava/latest//DeveloperGuide/credentials.html#credentials-default)
 
+Check https://plugins.gradle.org/plugin/com.ajmath.gradle-s3crets for the latest version
+
 Gradle file:
 
-```
+```gradle
+// Before gradle 2.1
 buildscript {
   repositories {
     jcenter()
   }
   dependencies {
-    classpath(group: 'com.ajmath', name: 'gradle-s3crets', version: '0.1.0')
+    classpath(group: 'com.ajmath', name: 'gradle-s3crets', version: '1.0.0')
   }
+}
+
+// Gradle 2.1 and later
+plugins {
+  id "com.jfrog.bintray" version "1.1"
+  id "com.ajmath.gradle-s3crets" version "1.0.0"
 }
 
 apply plugin: 'com.ajmath.gradle-s3crets'

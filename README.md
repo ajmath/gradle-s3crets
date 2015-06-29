@@ -42,6 +42,7 @@ s3crets {
 }
 ```
 
+**Does not work with dotted properties like `com.myorg.property`**
 
 ## Contributing
 

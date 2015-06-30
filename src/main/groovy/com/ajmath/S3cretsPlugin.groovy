@@ -44,8 +44,8 @@ class S3cretsPluginExtension {
 
   def propertyNotDefined(String property) {
     try {
-      return this.project.getProperty(key) == "" ||
-        this.project.getProperty(key) == null
+      return this.project.getProperty(property) == "" ||
+        this.project.getProperty(property) == null
     } catch(MissingPropertyException e) {
       return true
     }

@@ -7,6 +7,7 @@ import org.gradle.api.Plugin;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
 
 class S3cretsPlugin implements Plugin<Project> {
   void apply(Project project) {
@@ -50,10 +51,9 @@ class S3cretsPluginExtension {
   }
 
   def getCredProvider() {
-    if (this.awsProfile != null) {
-      return new ProfileCredentialsProvider(this.awsProfile)
-    }
-    return new DefaultAWSCredentialsProviderChain()
+    return new AWSCredentialsProviderChain(
+      new ProfileCredentialsProvider(this.awsProfile),
+      new DefaultAWSCredentialsProviderChain())
   }
 
   def propertyNotDefined(String property) {

@@ -28,6 +28,10 @@ class S3cretsPluginExtension {
     this.override = val
   }
 
+  def awsProfile(val) {
+    this.awsProfile = val
+  }
+
   def properties(String... s3paths) {
     for (s3path in s3paths) {
       def s3ObjRef = parseS3Url(s3path)

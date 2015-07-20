@@ -9,6 +9,10 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+
 class S3cretsPlugin implements Plugin<Project> {
   void apply(Project project) {
     project.extensions.create("s3crets", S3cretsPluginExtension, project)
@@ -16,6 +20,8 @@ class S3cretsPlugin implements Plugin<Project> {
 }
 
 class S3cretsPluginExtension {
+
+  Logger logger = LoggerFactory.getLogger(S3cretsPluginExtension.class)
 
   Project project
   boolean override = false
@@ -37,7 +43,16 @@ class S3cretsPluginExtension {
     for (s3path in s3paths) {
       def s3ObjRef = parseS3Url(s3path)
       def s3Client = new AmazonS3Client(getCredProvider())
-      def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
+
+      def s3Object = null
+      try {
+        s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
+      } catch (Exception e) {
+        logger.error("Unable to fetch file from s3. S3cret properties will not "
+          + "be set. Run with debug to get detailed exception")
+        logger.debug("Error pulling s3crets from s3", e)
+        return
+      }
 
       def props = new Properties()
       props.load(s3Object.getObjectContent())

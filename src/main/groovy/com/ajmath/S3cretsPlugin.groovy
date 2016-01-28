@@ -1,5 +1,6 @@
 package com.ajmath;
 
+import java.security.MessageDigest;
 
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;
@@ -26,6 +27,7 @@ class S3cretsPluginExtension {
   Project project
   boolean override = false
   String awsProfile = null
+  boolean allowCaching = false
 
   S3cretsPluginExtension(Project project) {
     this.project = project
@@ -39,23 +41,16 @@ class S3cretsPluginExtension {
     this.awsProfile = val
   }
 
+  def allowCaching(value=true) {
+    this.allowCaching = value
+  }
+
   def properties(String... s3paths) {
     for (s3path in s3paths) {
-      def s3ObjRef = parseS3Url(s3path)
-      def s3Client = new AmazonS3Client(getCredProvider())
-
-      def s3Object = null
-      try {
-        s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
-      } catch (Exception e) {
-        logger.error("Unable to fetch file from s3. S3cret properties will not "
-          + "be set. Run with debug to get detailed exception")
-        logger.debug("Error pulling s3crets from s3", e)
-        return
+      def props = loadProperties(s3path)
+      if(props == null) {
+        continue
       }
-
-      def props = new Properties()
-      props.load(s3Object.getObjectContent())
 
       props.each { key, val ->
         if (this.override || propertyNotDefined(key)) {
@@ -63,6 +58,49 @@ class S3cretsPluginExtension {
         }
       }
     }
+  }
+
+  Properties loadProperties(s3path) {
+    def s3ObjRef = parseS3Url(s3path)
+    def s3Client = new AmazonS3Client(getCredProvider())
+    def cacheFile = localCacheFile(s3path)
+
+    try {
+      def s3Object = s3Client.getObject(s3ObjRef.bucket, s3ObjRef.key)
+      def props = buildProps(s3Object.getObjectContent())
+
+      println "Loaded s3crets from ${s3path}, allowCaching = ${this.allowCaching}"
+      if(this.allowCaching == true) {
+        logger.info("Saving ${s3path} to cache")
+        cacheFile.withOutputStream { out ->
+          props.store(out, "Cached from ${s3path}")
+        }
+      }
+      return props
+    }
+    catch (Exception e) {
+      if(this.allowCaching && cacheFile.exists()) {
+        println "Using cached s3crets for ${s3path}"
+        return buildProps(cacheFile.newInputStream())
+      }
+      logger.error("Unable to fetch file from s3 and cache not available. S3cret properties will not "
+        + "be set. Run with debug to get detailed exception")
+      logger.debug("Error pulling s3crets from s3", e)
+      return null
+    }
+  }
+
+  Properties buildProps(inputStream) {
+    def props = new Properties()
+    props.load(inputStream)
+    return props
+  }
+
+  def localCacheFile(s3path) {
+    def s3cretDir = new File("${this.project.buildDir}/s3crets-cache/")
+    s3cretDir.mkdirs()
+    def keyHash = MessageDigest.getInstance("MD5").digest(s3path.bytes).encodeHex().toString()
+    return new File(s3cretDir, "${keyHash}.properties")
   }
 
   def getCredProvider() {
